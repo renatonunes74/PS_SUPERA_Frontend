@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ThemeProvider, GlobalStyles, createTheme, Grid, Button, Box, TextField } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueGetterParams, GridValueFormatterParams, GridToolbar } from '@mui/x-data-grid';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -23,64 +23,77 @@ const columns: GridColDef[] = [
 	{ 
 		field: 'id', 
 		headerName: 'ID',
-		width: 1
+		flex: 1
 	},
 	{ 
 		field: 'dataTransferencia', 
 		headerName: 'Data',
-		type: 'string'
+		type: 'string',
+		flex: 1
 	},
 	{
 		field: 'valor',
 		headerName:	'Valor',
-		type: 'number'
+		type: 'number',
+		flex: 1,
+		valueFormatter: (params: GridValueFormatterParams<number>) => {
+              if (params.value == null) {
+                return '';
+              }
+              return `R$ ${params.value.toLocaleString()}`;
+		},
 	},
 	{
 		field: 'tipo',
 		headerName:	'Tipo',
 		type: 'string',
-		width: 160
+		flex: 1
 	},
 	{
 		field: 'nomeOperadorTransacao',
 		headerName:	'Nome	do operador transacionado',
 		type: 'string',
-		width: 250
+		flex: 1
 	}
 ];
 
-const rowsa = [
-	{ id: 1, data: dayjs(new Date(2019, 2, 14)).format('DD/MM/YYYY'), unidade: 'R$', valor: '30895.46', tipo: 'Depósito', nomeOperadorTransacao: null },
+const initialRow = [
+	{ id: 1, dataTransferencia: null, valor: null, tipo: null, nomeOperadorTransacao: null },
 ];
 
 
 function App() {
 
+
 	const [startSelectedDate, setStartSelectedDate] = useState(null);
 	const [endSelectedDate, setEndSelectedDate] = useState(null);
-	const [rows, setRows] = useState(rowsa);
+	const [rows, setRows] = useState(initialRow);
+
+async function getTransfer() {
+    await busca('/transferencia', setRows);
+	}
+
+	useEffect(() => {
+		getTransfer();
+	}, []);
 
 	const handleSearch = () => {
 		// Lógica para filtrar os dados por período de datas
-		const filteredRows = rowsa.filter((row) => {
-			const rowDate = dayjs(row.data, 'DD/MM/YYYY');
+		const filteredRows = rows.filter((rows) => {
+			const rowDate = dayjs(rows.dataTransferencia, 'YYYY/MM/DD');
 			if (startSelectedDate && endSelectedDate) {
 				return rowDate.isBetween(startSelectedDate, endSelectedDate, 'day', '[]');
 			} else if (startSelectedDate !== null) {
+				busca(`/transferencia/${startSelectedDate}`, setRows);
+				return rowDate.isSame(startSelectedDate, 'day');
 			}
 			return true;
 		});
 		console.log(filteredRows);
-		console.log(rowsa);
+		console.log(initialRow);
 		setRows(filteredRows);
 	};
 
-async function getTransfer() {
-    await busca('/transferencia', setRows);
-  }
-	 useEffect(() => {
-    getTransfer();
-  });
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -115,19 +128,25 @@ async function getTransfer() {
 						></TextField>
 					</Grid>
 				</Grid>
-					<Button fullWidth	onClick={handleSearch}>Pesquisar</Button>
+				<Button fullWidth	onClick={handleSearch}>Pesquisar</Button>
 				<DataGrid
 					rows={rows}
 					columns={columns}
+					components={{
+						Toolbar: GridToolbar,
+					}}
 					initialState={{
 						pagination: {
 							paginationModel: { page: 0, pageSize: 5 },
+						},
+						sorting: {
+							sortModel: [{ field: 'dataTransferencia', sort: 'desc' }],
 						},
 					}}
 					pageSizeOptions={[5, 10]}/>
 			</Box>
 		</ThemeProvider>
-		);
+	);
 }
 
 export default App;
