@@ -5,7 +5,7 @@
 ![GitHub last commit"](https://img.shields.io/github/last-commit/renatonunes74/PS_SUPERA_Frontend.svg?style=for-the-badge)
 ![Repository issues"](https://img.shields.io/github/issues/rockofox/firefox-minima.svg?style=for-the-badge)
 # Processo Seletivo SUPERA
-**Frontend em React de transferência de banco<br/>[Repo. da API RestFul em Java](https://github.com/renatonunes74/PS_SUPERA_Backend)**
+**Frontend em React de transferência de banco<br/>[Repo. da API RESTFul em Java](https://github.com/renatonunes74/PS_SUPERA_Backend)**
 
 [Como usar](#como-usar) -
 [Funcionalidades](#funcionalidades) -
@@ -28,7 +28,7 @@
         1. `npm run start`
     - Via IDE (Vscode...)
 1. Agora é só fazer as requisições para a API
-    - **OBS**: necessário estar com a [API RestFul em Java](https://github.com/renatonunes74/PS_SUPERA_Backend) rodando localmente
+    - **OBS**: necessário estar com a [API RESTFul em Java](https://github.com/renatonunes74/PS_SUPERA_Backend) rodando localmente
 
 ### Funcionalidades
 - Filtrar por data inicial
@@ -36,7 +36,7 @@
 - Filtrar entre datas (inicial e final)
 
 ### Dependências necessárias
-- [NodeJS](https://dev.java/)
+- [NodeJS](https://nodejs.org)
 
 ### Tecnologias usadas
 - Frameworks: [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
