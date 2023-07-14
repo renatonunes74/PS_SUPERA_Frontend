@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, GlobalStyles, createTheme, Grid, Button, Box, TextField } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -7,13 +7,8 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { busca } from './services/Service';
 import { ptBR } from '@mui/material/locale';
-
-
-
-function createData(date: Date, valor: number, tipo: string, nomeOperadorTransacao: string) {
-	return { date, valor, tipo, nomeOperadorTransacao };
-}
 
 const theme = createTheme(
 	{
@@ -31,15 +26,9 @@ const columns: GridColDef[] = [
 		width: 1
 	},
 	{ 
-		field: 'data', 
+		field: 'dataTransferencia', 
 		headerName: 'Data',
-		type: 'Data'
-	},
-	{
-		field: 'unidade',
-		headerName:	'Unid.',
-		type: 'string',
-		width: 1
+		type: 'string'
 	},
 	{
 		field: 'valor',
@@ -57,15 +46,11 @@ const columns: GridColDef[] = [
 		headerName:	'Nome	do operador transacionado',
 		type: 'string',
 		width: 250
-
 	}
 ];
 
 const rowsa = [
 	{ id: 1, data: dayjs(new Date(2019, 2, 14)).format('DD/MM/YYYY'), unidade: 'R$', valor: '30895.46', tipo: 'Depósito', nomeOperadorTransacao: null },
-	{ id: 2, data: dayjs(new Date(2019, 2, 14)).format('DD/MM/YYYY'), unidade: 'R$', valor: '12.24', tipo: 'Transferência Entrada', nomeOperadorTransacao: 'Fulano' },
-	{ id: 3, data: dayjs(new Date(2019, 4, 12)).format('DD/MM/YYYY'), unidade: 'R$', valor: '-500.50', tipo: 'Transferência Saída', nomeOperadorTransacao: 'Sicrano' },
-	{ id: 4, data: dayjs(new Date(2020, 6, 11)).format('DD/MM/YYYY'), unidade: 'R$', valor: '-1234.00', tipo: 'Saque', nomeOperadorTransacao: null },
 ];
 
 
@@ -90,12 +75,19 @@ function App() {
 		setRows(filteredRows);
 	};
 
+async function getTransfer() {
+    await busca('/transferencia', setRows);
+  }
+	 useEffect(() => {
+    getTransfer();
+  });
+
 	return (
 		<ThemeProvider theme={theme}>
 			<GlobalStyles	styles={{body: { backgroundColor: "#121212" }}}/>
-			<Box margin="9em">
+			<Box marginTop="9em">
 				<Grid container spacing={7}>
-					<Grid item xs={4}>
+					<Grid item xs={6} md={4}>
 						<LocalizationProvider dateAdapter={AdapterDayjs}>
 							<DatePicker
 								value={startSelectedDate}
@@ -105,7 +97,7 @@ function App() {
 							/>
 						</LocalizationProvider>
 					</Grid>
-					<Grid item xs={4}>
+					<Grid item xs={6} md={4}>
 						<LocalizationProvider dateAdapter={AdapterDayjs}>
 							<DatePicker
 								value={endSelectedDate}
@@ -115,15 +107,15 @@ function App() {
 							/>
 						</LocalizationProvider>
 					</Grid>
-					<Grid item xs={4}>
+					<Grid item xs={12} md={4}>
 						<TextField
 							name="date"
 							fullWidth
 							label="Nome do operador transacionado"
 						></TextField>
 					</Grid>
-					<Button fullWidth	onClick={handleSearch}>Pesquisar</Button>
 				</Grid>
+					<Button fullWidth	onClick={handleSearch}>Pesquisar</Button>
 				<DataGrid
 					rows={rows}
 					columns={columns}
