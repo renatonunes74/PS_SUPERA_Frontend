@@ -28,7 +28,8 @@
         1. `npm run start`
     - Via IDE (Vscode...)
 1. Agora é só fazer as requisições para a API
-    - **OBS**: necessário estar com a [API RESTFul em Java](https://github.com/renatonunes74/PS_SUPERA_Backend) rodando localmente
+	1. **OBS**: necessário estar com a [API RESTFul em Java](https://github.com/renatonunes74/PS_SUPERA_Backend) rodando localmente
+ 	2. **OBS**: verifique se a variável `BASEURL` em `banco/services/Services.ts` é a mesma da [API RESTFul em Java](https://github.com/renatonunes74/PS_SUPERA_Backend)
 
 ### Funcionalidades
 - [x] Filtro por período de datas
