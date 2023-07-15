@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, GlobalStyles, createTheme, Grid, Button, Box, TextField } from '@mui/material';
+import { ThemeProvider, CssBaseline, Typography, createTheme, Grid, Button, Box, TextField } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { DataGrid, GridColDef, GridValueGetterParams, GridValueFormatterParams, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueFormatterParams } from '@mui/x-data-grid';
 import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { busca } from './services/Service';
 import { ptBR } from '@mui/material/locale';
 
@@ -28,8 +25,13 @@ const columns: GridColDef[] = [
 	{ 
 		field: 'dataTransferencia', 
 		headerName: 'Data',
-		type: 'string',
-		flex: 1
+		type: 'Data',
+		flex: 1,
+		valueFormatter: (params) => {
+			const dataTransferencia = params.value as string;
+			const localDate = new Date(dataTransferencia).toLocaleDateString();
+			return dayjs(new Date(localDate)).format('DD/MM/YYYY');
+		},
 	},
 	{
 		field: 'valor',
@@ -37,10 +39,10 @@ const columns: GridColDef[] = [
 		type: 'number',
 		flex: 1,
 		valueFormatter: (params: GridValueFormatterParams<number>) => {
-              if (params.value == null) {
-                return '';
-              }
-              return `R$ ${params.value.toLocaleString()}`;
+			if (params.value == null) {
+				return '';
+			}
+			return `R$ ${params.value.toLocaleString()}`;
 		},
 	},
 	{
@@ -64,41 +66,58 @@ const initialRow = [
 
 function App() {
 
-
 	const [startSelectedDate, setStartSelectedDate] = useState(null);
 	const [endSelectedDate, setEndSelectedDate] = useState(null);
+	const [nomeOperador, setNomeOperador] = useState("");
+	const [saldoTotal, setSaldoTotal] = useState(0);
+	const [saldoTotalPeriodo, setSaldoTotalPeriodo] = useState(0);
 	const [rows, setRows] = useState(initialRow);
 
-async function getTransfer() {
-    await busca('/transferencia', setRows);
+
+	async function getTransfer() {
+		const resposta = await busca('/transferencias', setRows);
+		let saldo = 0;
+		resposta.forEach((transferencia: any) => {
+			saldo += transferencia.valor;
+		});
+		setSaldoTotal(saldo);
 	}
 
 	useEffect(() => {
 		getTransfer();
-	}, []);
+		}, []);
+
+	useEffect(() => {
+		saldoPeriodo();
+		}, [rows]);
+
+	function saldoPeriodo() {
+		let saldo = 0;
+		rows.forEach((transferencia) => {
+			if (transferencia.valor !== null) {
+				saldo += transferencia.valor;
+			}
+		})
+		setSaldoTotalPeriodo(saldo);
+	}
 
 	const handleSearch = () => {
 		// Lógica para filtrar os dados por período de datas
 		const filteredRows = rows.filter((rows) => {
-			const rowDate = dayjs(rows.dataTransferencia, 'YYYY/MM/DD');
-			if (startSelectedDate && endSelectedDate) {
-				return rowDate.isBetween(startSelectedDate, endSelectedDate, 'day', '[]');
-			} else if (startSelectedDate !== null) {
-				busca(`/transferencia/${startSelectedDate}`, setRows);
-				return rowDate.isSame(startSelectedDate, 'day');
+			const rowDate = dayjs(rows.dataTransferencia, 'DD/MM/YYYY');
+			if (startSelectedDate !== null && endSelectedDate !== null && nomeOperador !== "") {
+				busca(`/transferencias/filtro?inicio=${dayjs(startSelectedDate).format('YYYY-MM-DD')}&fim=${dayjs(endSelectedDate).format('YYYY-MM-DD')}&operador=${nomeOperador}`, setRows)
+			} else if (startSelectedDate !== null && endSelectedDate !== null) {
+				busca(`/transferencias/filtro?inicio=${dayjs(startSelectedDate).format('YYYY-MM-DD')}&fim=${dayjs(endSelectedDate).format('YYYY-MM-DD')}`, setRows)
+			} else {
 			}
-			return true;
 		});
-		console.log(filteredRows);
-		console.log(initialRow);
-		setRows(filteredRows);
 	};
-
 
 	return (
 		<ThemeProvider theme={theme}>
-			<GlobalStyles	styles={{body: { backgroundColor: "#121212" }}}/>
-			<Box marginTop="9em">
+			<CssBaseline />
+			<Box margin="9em">
 				<Grid container spacing={7}>
 					<Grid item xs={6} md={4}>
 						<LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -114,7 +133,7 @@ async function getTransfer() {
 						<LocalizationProvider dateAdapter={AdapterDayjs}>
 							<DatePicker
 								value={endSelectedDate}
-								onChange={date => setEndSelectedDate(date)}
+								onChange={(date) => setEndSelectedDate(date)}
 								label="Data de Fim"
 								format="DD/MM/YYYY"
 							/>
@@ -122,19 +141,41 @@ async function getTransfer() {
 					</Grid>
 					<Grid item xs={12} md={4}>
 						<TextField
+							value={nomeOperador}
 							name="date"
 							fullWidth
 							label="Nome do operador transacionado"
-						></TextField>
+							onChange={(nome) => setNomeOperador(nome.target.value)}/>
 					</Grid>
 				</Grid>
-				<Button fullWidth	onClick={handleSearch}>Pesquisar</Button>
+				<Grid container>
+					<Grid item xs={6} textAlign="right">
+						<Button
+							onClick={() => {
+								setStartSelectedDate(null);
+								setEndSelectedDate(null);
+								setNomeOperador("");
+								}
+							}>Limpar todos os campos</Button>
+					</Grid>
+					<Grid item xs={6}>
+						<Button onClick={handleSearch}>Pesquisar</Button>
+					</Grid>
+				</Grid>
+				<Grid item xs={4}>
+					<Typography variant="body1">
+						Saldo total: {saldoTotal.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}
+					</Typography>
+					<Typography variant="body1">
+						Saldo no período: {saldoTotalPeriodo.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})}
+					</Typography>
+				</Grid>
 				<DataGrid
 					rows={rows}
 					columns={columns}
-					components={{
-						Toolbar: GridToolbar,
-					}}
+					// components={{
+					// 	Toolbar: GridToolbar,
+					// }}
 					initialState={{
 						pagination: {
 							paginationModel: { page: 0, pageSize: 5 },
