@@ -5,6 +5,12 @@ export const api = axios.create({
 })
 
 export const busca = async (url: string, setDados: any) => {
-	const resposta = await api.get(url)
-	setDados(resposta.data)
+	try {
+		const resposta = await api.get(url)
+		setDados(resposta.data)
+		return resposta.data;
+	} catch (error) {
+		console.log(error)
+		return null;
+	}
 }
