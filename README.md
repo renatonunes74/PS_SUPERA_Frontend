@@ -43,8 +43,8 @@
 - [NodeJS](https://nodejs.org)
 
 ### Tecnologias usadas
-- Frameworks: [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
-- Bibliotecas:
-    - [Axios](https://axios-http.com/) (Integração para consumir a API)
-    - [Material UI](https://mui.com/) (Ferramentas de interface para o React UI)
-    - [Day.js](https://day.js.org/) (Analisa, valida, manipula e exibe datas e horas)
+- Linguagem: [TypeScript](https://www.typescriptlang.org/) 
+    - Frameworks: [React](https://react.dev/)- Bibliotecas:
+        - [Axios](https://axios-http.com/) (Integração para consumir a API)
+        - [Day.js](https://day.js.org/) (Analisa, valida, manipula e exibe datas e horas)
+        - [Material UI](https://mui.com/) (Ferramentas de interface para o React UI)
