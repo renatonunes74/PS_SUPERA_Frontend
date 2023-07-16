@@ -40,7 +40,7 @@
 - [x] Limpeza dos campos
 
 ### Dependências necessárias
-- [NodeJS](https://nodejs.org)
+- [npm](https://docs.npmjs.com)
 
 ### Tecnologias usadas
 - Linguagem: [TypeScript](https://www.typescriptlang.org/) 
