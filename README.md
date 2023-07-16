@@ -21,7 +21,7 @@
 1. Clone o repositório
     - `git clone https://github.com/renatonunes74/PS_SUPERA_Frontend`
 1. Entre na pasta
-    - `cd PS_SUPERA_Frontend/banco`
+    - `cd PS_SUPERA_Frontend`
 1. Rode localmente
     - CLI / via Terminal:
         1. `npm install`
